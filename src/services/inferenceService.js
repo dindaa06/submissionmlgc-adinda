@@ -1,45 +1,45 @@
 const tf = require('@tensorflow/tfjs-node');
 const InputError = require('../exceptions/InputError');
- 
+
+// Fungsi untuk memprediksi klasifikasi gambar (Cancer vs Non-cancer)
 async function predictClassification(model, image) {
     try {
+        // Menyiapkan gambar (mengubahnya menjadi tensor)
         const tensor = tf.node
-            .decodeJpeg(image)
-            .resizeNearestNeighbor([224, 224])
-            .expandDims()
-            .toFloat()
- 
-        const classes = ['Melanocytic nevus', 'Squamous cell carcinoma', 'Vascular lesion'];
- 
+            .decodeJpeg(image)  // Mendekode gambar JPEG
+            .resizeNearestNeighbor([224, 224])  // Mengubah ukuran gambar
+            .expandDims()  // Menambahkan dimensi batch
+            .toFloat();  // Menjadikan tensor dalam format float
+
+        // Melakukan prediksi menggunakan model
         const prediction = model.predict(tensor);
-        const score = await prediction.data();
-        const confidenceScore = Math.max(...score) * 100;
- 
-        const classResult = tf.argMax(prediction, 1).dataSync()[0];
-        const label = classes[classResult];
- 
-        let explanation, suggestion;
- 
-        if(label === 'Melanocytic nevus') {
-            explanation = "Melanocytic nevus adalah kondisi di mana permukaan kulit memiliki bercak warna yang berasal dari sel-sel melanosit, yakni pembentukan warna kulit dan rambut."
-            suggestion = "Segera konsultasi dengan dokter terdekat jika ukuran semakin membesar dengan cepat, mudah luka atau berdarah."
+        const score = await prediction.data();  // Menunggu hasil prediksi
+        const confidenceScore = Math.max(...score) * 100;  // Mendapatkan confidence score tertinggi
+
+        // Menentukan label berdasarkan klasifikasi
+        let label, suggestion;
+
+        // Logika hasil prediksi berdasarkan score
+        if (confidenceScore > 50) {  // Jika skor lebih dari 50%, prediksi "Cancer"
+            label = 'Cancer';
+            suggestion = 'Segera periksa ke dokter!';
+        } else {  // Jika skor di bawah 50%, prediksi "Non-cancer"
+            label = 'Non-cancer';
+            suggestion = 'Penyakit kanker tidak terdeteksi.';
         }
- 
-        if(label === 'Squamous cell carcinoma') {
-            explanation = "Squamous cell carcinoma adalah jenis kanker kulit yang umum dijumpai. Penyakit ini sering tumbuh pada bagian-bagian tubuh yang sering terkena sinar UV."
-            suggestion = "Segera konsultasi dengan dokter terdekat untuk meminimalisasi penyebaran kanker."
-        }
- 
-        if(label === 'Vascular lesion') {
-            explanation = "Vascular lesion adalah penyakit yang dikategorikan sebagai kanker atau tumor di mana penyakit ini sering muncul pada bagian kepala dan leher."
-            suggestion = "Segera konsultasi dengan dokter terdekat untuk mengetahui detail terkait tingkat bahaya penyakit."
-        
-        }
- 
-        return { confidenceScore, label, explanation, suggestion };
+
+        // Mengembalikan hasil dalam format yang diinginkan
+        return {
+            confidenceScore,  // Skor keyakinan tertinggi
+            label,            // Label hasil prediksi (Cancer atau Non-cancer)
+            suggestion        // Saran untuk pengguna berdasarkan hasil
+        };
+
     } catch (error) {
-        throw new InputError(`Terjadi kesalahan input: ${error.message}`)
+        // Menangani kesalahan input atau prediksi
+        console.error('Error during prediction:', error.message);
+        throw new InputError(`Terjadi kesalahan dalam melakukan prediksi: ${error.message}`);
     }
 }
- 
+
 module.exports = predictClassification;
