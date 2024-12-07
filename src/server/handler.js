@@ -22,7 +22,6 @@ async function postPredictHandler(request, h) {
   }
 
   const id = crypto.randomUUID();
-
   const createdAt = new Date().toISOString();
 
   const data = {
@@ -42,17 +41,15 @@ async function postPredictHandler(request, h) {
     }).code(500);  
   }
 
-  const message = confidenceScore > 99 
-    ? 'Model is predicted successfully.'
-    : 'Model is predicted successfully but under threshold. Please use the correct picture';
+  const message = "Model is predicted successfully";
 
   const response = h.response({
     status: 'success',
     message: message,
     data: {
       id,
-      result: label, 
-      suggestion,
+      result: label,
+      suggestion: suggestion,
       createdAt
     }
   });
