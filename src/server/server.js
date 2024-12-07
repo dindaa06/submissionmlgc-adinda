@@ -10,23 +10,19 @@ const InputError = require('../exceptions/InputError');
         host: '0.0.0.0',
         routes: {
             cors: {
-                origin: ['*'], // Mengizinkan semua origin untuk akses
+                origin: ['*'], 
             },
         },
     });
 
-    // Memuat model untuk digunakan di seluruh aplikasi
     const model = await loadModel();
     server.app.model = model;
 
-    // Mengonfigurasi routes
     server.route(routes);
 
-    // Menangani error secara global
     server.ext('onPreResponse', (request, h) => {
         const response = request.response;
 
-        // Menangani InputError (custom error)
         if (response instanceof InputError) {
             const newResponse = h.response({
                 status: 'fail',
@@ -36,7 +32,6 @@ const InputError = require('../exceptions/InputError');
             return newResponse;
         }
 
-        // Menangani error Hapi (Boom error)
         if (response.isBoom) {
             const { output } = response;
             const newResponse = h.response({
@@ -47,21 +42,18 @@ const InputError = require('../exceptions/InputError');
             return newResponse;
         }
 
-        // Menangani error lain yang tidak terduga
         if (response.isServer) {
             const newResponse = h.response({
                 status: 'fail',
                 message: 'Terjadi kesalahan internal pada server.',
             });
-            newResponse.code(500);  // Kode status untuk kesalahan server
+            newResponse.code(500);  
             return newResponse;
         }
 
-        // Melanjutkan jika tidak ada error
         return h.continue;
     });
 
-    // Memulai server
     await server.start();
     console.log(`Server start at: ${server.info.uri}`);
 })();

@@ -14,4 +14,4 @@ async function testFirestoreConnection() {
   }
 }
 
-testFirestoreConnection();
+testFirestoreConnection();  // Pastikan fungsi ini dipanggil dengan benar
