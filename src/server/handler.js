@@ -17,7 +17,7 @@ async function postPredictHandler(request, h) {
     console.error('Error during prediction:', error);
     return h.response({
       status: 'fail',
-      message: 'Terjadi kesalahan dalam melakukan prediksi, silakan coba lagi dengan gambar yang sesuai.',
+      message: 'Terjadi kesalahan dalam melakukan prediksi',
     }).code(400);  
   }
 
